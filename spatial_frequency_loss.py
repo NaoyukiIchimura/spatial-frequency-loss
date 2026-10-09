@@ -108,8 +108,8 @@ class _Conv2dDoGFilterBank(nn.Module):
                 out_channels=num_image_channels,
                 kernel_size=(filter_size, filter_size),
                 stride=(1, 1),
-                padding=(0, 0),
-                groups=num_image_channels, # Note the depthwise convolution
+                padding=(0, 0),  # Replicate padding is applied in forward().
+                groups=num_image_channels,  # Apply depthwise convolution.
                 bias=False,
             )
             kernel_array = self._create_gaussian_kernel_2d(
@@ -378,7 +378,7 @@ class _SeparableDoGFilterBank(nn.Module):
                 out_channels=num_image_channels,
                 kernel_size=(1, filter_size),
                 stride=(1, 1),
-                padding=(0, 0),
+                padding=(0, 0),  # Replicate padding is applied in forward().
                 groups=num_image_channels,
                 bias=False,
             )
@@ -387,7 +387,7 @@ class _SeparableDoGFilterBank(nn.Module):
                 out_channels=num_image_channels,
                 kernel_size=(filter_size, 1),
                 stride=(1, 1),
-                padding=(0, 0),
+                padding=(0, 0),  # Replicate padding is applied in forward().
                 groups=num_image_channels,
                 bias=False,
             )
@@ -1049,7 +1049,8 @@ class SpatialFrequencyLoss(nn.Module):
         )
 
 
-        # Match the active-weight dtype to the subband-loss dtype
+        # Keep the persistent active weights unchanged, and create a temporary
+        # dtype-matched tensor only for the current loss computation.
         active_weights = self.subband_weights
         active_weights_for_loss = active_weights.to(
             dtype=subband_losses.dtype
