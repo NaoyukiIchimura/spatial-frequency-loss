@@ -1,0 +1,23 @@
+NORMALIZE_GAUSSIAN=False
+subband_1: max_abs=2.980232238770e-07, mean_abs=4.300899547616e-08, rms=5.932718849522e-08, max_reference_abs=4.775869846344e-01
+subband_2: max_abs=5.960464477539e-07, mean_abs=8.681995922188e-08, rms=1.135606098046e-07, max_reference_abs=2.698184251785e-01
+subband_3: max_abs=8.940696716309e-07, mean_abs=1.638390472181e-07, rms=2.129521590177e-07, max_reference_abs=2.052240669727e-01
+subband_4: max_abs=1.728534698486e-06, mean_abs=2.995185184318e-07, rms=3.860288870783e-07, max_reference_abs=1.145106554031e-01
+subband_5: max_abs=4.827976226807e-06, mean_abs=9.456753105042e-07, rms=1.141628786172e-06, max_reference_abs=8.482950925827e-02
+subband_6: max_abs=1.591444015503e-05, mean_abs=6.548584224220e-06, rms=7.233088126668e-06, max_reference_abs=6.393817067146e-02
+subband_7: max_abs=1.704692840576e-05, mean_abs=7.655802619411e-06, rms=8.309242730320e-06, max_reference_abs=6.111625432968e-01
+subband_losses: max_abs=2.861488610506e-07, mean_abs=6.568318866584e-08, rms=1.244051190952e-07, max_reference_abs=5.914184451103e-02
+weighted_sfl: max_abs=7.629394531250e-06, mean_abs=7.629394531250e-06, rms=7.629394531250e-06, max_reference_abs=3.388626861572e+01
+largest_subband_difference: subband=7, max_abs=1.704692840576e-05
+
+NORMALIZE_GAUSSIAN=True
+subband_1: max_abs=2.980232238770e-07, mean_abs=4.325928770754e-08, rms=6.080755099447e-08, max_reference_abs=4.792779088020e-01
+subband_2: max_abs=5.364418029785e-07, mean_abs=9.343558105002e-08, rms=1.225697587870e-07, max_reference_abs=2.671332955360e-01
+subband_3: max_abs=9.536743164062e-07, mean_abs=1.635764590446e-07, rms=2.121794580034e-07, max_reference_abs=2.052313834429e-01
+subband_4: max_abs=1.639127731323e-06, mean_abs=3.003437711868e-07, rms=3.823344059128e-07, max_reference_abs=1.145496070385e-01
+subband_5: max_abs=4.172325134277e-06, mean_abs=9.567244205755e-07, rms=1.147840976046e-06, max_reference_abs=8.485269546509e-02
+subband_6: max_abs=1.621246337891e-05, mean_abs=6.289311841101e-06, rms=6.997953278187e-06, max_reference_abs=6.395006179810e-02
+subband_7: max_abs=1.734495162964e-05, mean_abs=7.407124030578e-06, rms=8.059250831138e-06, max_reference_abs=6.112284660339e-01
+subband_losses: max_abs=2.747401595116e-07, mean_abs=6.572476252131e-08, rms=1.210620723668e-07, max_reference_abs=5.935316532850e-02
+weighted_sfl: max_abs=7.629394531250e-06, mean_abs=7.629394531250e-06, rms=7.629394531250e-06, max_reference_abs=3.393676376343e+01
+largest_subband_difference: subband=7, max_abs=1.734495162964e-05
