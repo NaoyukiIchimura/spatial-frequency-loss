@@ -624,9 +624,10 @@ class _SeparableDoGFilterBank(nn.Module):
 # filter_size_factor : float
 #     Factor used to determine finite filter sizes.
 # filter_backend : str
-#     "conv2d" uses two-dimensional depthwise Gaussian convolution.
 #     "separable" uses consecutive horizontal and vertical depthwise
-#     Gaussian convolutions.
+#     Gaussian convolutions and is the recommended default backend.
+#     "conv2d" uses two-dimensional depthwise Gaussian convolution and is
+#     retained for compatibility and numerical validation.
 # ier_update_mode : str
 #     "calibration" estimates IER weights in a forward-only calibration pass
 #     before optimization and then keeps them fixed. "fixed" uses explicitly
@@ -657,7 +658,7 @@ class SpatialFrequencyLoss(nn.Module):
         num_subbands: int,
         scale_radix: float = 2.0,
         filter_size_factor: float = 8.0,
-        filter_backend: str = "conv2d",
+        filter_backend: str = "separable",
         ier_update_mode: str = "calibration",
         ier_reduction: str = "sample",
         eps: float = 1.0e-12,
