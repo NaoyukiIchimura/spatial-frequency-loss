@@ -5,11 +5,11 @@ spectral bias in deep neural networks and improve the learning of fine-scale
 image structures. The SFL measures reconstruction errors in overlapping
 spatial-frequency subbands produced by a Difference-of-Gaussians filter bank.
 
-- <a href="https://naoyukiichimura.github.io/spatial-frequency-loss/" target="_blank" rel="noopener noreferrer">Project page</a>
-- <a href="https://doi.org/10.1007/s00138-026-01927-5" target="_blank" rel="noopener noreferrer">Paper</a>
-- <a href="https://rdcu.be/XSJ786PqnMca" target="_blank" rel="noopener noreferrer">View-only full text</a>
-- <a href="https://media.springernature.com/original/springer-static/esm/art%3A10.1007%2Fs00138-026-01927-5/MediaObjects/138_2026_1927_MOESM1_ESM.pdf" target="_blank" rel="noopener noreferrer">Supplementary material</a>
-- <a href="https://naoyukiichimura.github.io/spatial-frequency-loss/corrections.html" target="_blank" rel="noopener noreferrer">Post-publication corrections</a>
+- [Project page](https://naoyukiichimura.github.io/spatial-frequency-loss/)
+- [Paper](https://doi.org/10.1007/s00138-026-01927-5)
+- [View-only full text](https://rdcu.be/XSJ786PqnMca)
+- [Supplementary material](https://media.springernature.com/original/springer-static/esm/art%3A10.1007%2Fs00138-026-01927-5/MediaObjects/138_2026_1927_MOESM1_ESM.pdf)
+- [Post-publication corrections](https://naoyukiichimura.github.io/spatial-frequency-loss/corrections.html)
 
 ## Key features
 
@@ -208,6 +208,44 @@ sfl = SpatialFrequencyLoss(
 ).to(device)
 ```
 
+To observe how another loss function changes the subband losses without adding
+the SFL to the optimization objective, use fixed mode with all subband weights
+set to zero. The returned `weighted_sfl` is then zero, while the returned
+`subband_losses` remain available for monitoring.
+
+```python
+sfl_for_monitoring = SpatialFrequencyLoss(
+    num_image_channels=3,
+    base_scale=0.6,
+    num_subbands=7,
+    ier_update_mode="fixed",
+    subband_weights=[
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+    ],
+).to(device)
+
+(
+    subband_losses,
+    weighted_sfl,
+    _,
+    _,
+    _,
+) = sfl_for_monitoring(
+    outputs,
+    targets,
+)
+```
+
+In this monitoring configuration, optimize the model with the other loss
+function only and record `subband_losses` to analyze the spatial-frequency error
+in each subband.
+
 ## Return values
 
 Calling the SFL returns five values:
@@ -227,9 +265,10 @@ Calling the SFL returns five values:
 
 - `subband_losses`: one batch-mean L2 loss per subband.
 - `weighted_sfl`: scalar weighted sum of the subband losses.
-- `output_subbands`: output-image subbands in high-to-low spatial-frequency
-  order.
-- `target_subbands`: target-image subbands in the same order.
+- `output_subbands`: subband images obtained from the output image, ordered
+  from high to low spatial frequency.
+- `target_subbands`: subband images obtained from the target image, in the
+  same order.
 - `active_weights`: detached copy of the active subband weights.
 
 The public `filter_bank()` method may also be used when the subband images are
@@ -350,14 +389,14 @@ tests. The public API supports calibrated and explicitly fixed IER weights.
 The published experiments evaluated the SFL with VQ-VAE models on FFHQ and
 COCO2017. The SFL improved the reported validation image-quality metrics and reduced
 high-frequency subband losses relative to the pixel-wise baseline. See the
-<a href="https://naoyukiichimura.github.io/spatial-frequency-loss/" target="_blank" rel="noopener noreferrer">project page</a> for visual examples, quantitative tables,
+[project page](https://naoyukiichimura.github.io/spatial-frequency-loss/) for visual examples, quantitative tables,
 computation-time context, and post-publication information.
 
 ## Paper
 
 Naoyuki Ichimura, "Spatial frequency loss for mitigating spectral bias in deep
 neural networks," *Machine Vision and Applications* 37, 173 (2026).
-<a href="https://doi.org/10.1007/s00138-026-01927-5" target="_blank" rel="noopener noreferrer">DOI: 10.1007/s00138-026-01927-5</a>
+[DOI: 10.1007/s00138-026-01927-5](https://doi.org/10.1007/s00138-026-01927-5)
 
 ## Citation
 
