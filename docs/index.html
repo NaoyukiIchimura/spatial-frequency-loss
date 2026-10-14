@@ -30,7 +30,7 @@ for epoch in range(num_epochs):
 
         outputs = model(inputs)
 
-        l2_loss = loss_function(
+        l2_loss = mse_loss(
             outputs,
             targets,
         )
