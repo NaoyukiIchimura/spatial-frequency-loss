@@ -1,0 +1,22 @@
+cff-version: 1.2.0
+message: >-
+  If you use this software, please cite the software and the associated paper.
+title: Spatial Frequency Loss
+type: software
+authors:
+  - family-names: Ichimura
+    given-names: Naoyuki
+repository-code: https://github.com/NaoyukiIchimura/spatial-frequency-loss
+license: GPL-3.0-only
+preferred-citation:
+  type: article
+  authors:
+    - family-names: Ichimura
+      given-names: Naoyuki
+  title: Spatial frequency loss for mitigating spectral bias in deep neural networks
+  journal: Machine Vision and Applications
+  year: 2026
+  volume: 37
+  issue: 6
+  article-number: 173
+  doi: 10.1007/s00138-026-01927-5
