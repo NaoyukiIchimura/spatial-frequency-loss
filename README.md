@@ -1,32 +1,258 @@
 # Spatial Frequency Loss
 
-Spatial Frequency Loss (SFL) measures reconstruction errors in overlapping
+Spatial Frequency Loss (SFL) is a subband-aware loss designed to mitigate
+spectral bias in deep neural networks and improve the learning of fine-scale
+image structures. SFL measures reconstruction errors in overlapping
 spatial-frequency subbands produced by a Difference-of-Gaussians filter bank.
-The public implementation supports fixed subband weights and forward-only IER
-calibration followed by fixed-weight optimization.
 
-## Filter backend
+- [Project page](docs/index.html)
+- [Paper](https://doi.org/10.1007/s00138-026-01927-5)
+- [View-only full text](https://rdcu.be/XSJ786PqnMca)
+- [Supplementary material](https://media.springernature.com/original/springer-static/esm/art%3A10.1007%2Fs00138-026-01927-5/MediaObjects/138_2026_1927_MOESM1_ESM.pdf)
+- [Post-publication corrections](docs/corrections.html)
 
-The default backend is `separable`. It applies each isotropic Gaussian as
-consecutive horizontal and vertical depthwise convolutions. The `conv2d`
-backend remains available for compatibility and numerical validation.
+## Key features
 
-The two backends implement the same mathematical filtering operation. The test
-suite checks their agreement within numerical floating-point tolerances.
+- **Frequency-selective measurements:** A Difference-of-Gaussians filter bank
+  measures discrepancies between corresponding spatial-frequency responses of
+  generated and target images.
+- **Data-driven subband weighting:** The Inverse Error Ratio (IER) method
+  determines the subband weights automatically from calibration data.
+- **Fidelity-oriented learning:** SFL does not require adversarial training or
+  nonlinear features from a pre-trained model. In the evaluated experiments,
+  SFL improved fine-scale image structures without introducing noticeable
+  additional artifacts.
+- **Minimal integration:** SFL is a regular PyTorch module. Existing model
+  architectures, data loaders, optimizers, and training loops require only
+  small, localized additions.
+- **Efficient default backend:** Separable filtering is the recommended default
+  backend. The original two-dimensional convolution backend remains available
+  for compatibility and numerical validation.
+
+The fidelity-oriented design may be particularly valuable when artificially
+generated structures are undesirable, including potential applications in
+medical imaging and physics-based image processing. These application areas
+were not directly evaluated in the published experiments.
+
+## Requirements
+
+The public implementation uses:
+
+- Python
+- PyTorch
+- NumPy
+
+Use versions compatible with the PyTorch environment of the target project.
+
+## Installation
+
+Clone the repository and run Python from the repository root, or copy
+`spatial_frequency_loss.py` into the target project.
+
+```bash
+git clone https://github.com/NaoyukiIchimura/spatial-frequency-loss.git
+cd spatial-frequency-loss
+```
+
+The repository will be updated with package-installation instructions when a
+packaged release becomes available.
+
+## Quick start
+
+The following example shows the simplest workflow in which SFL automatically
+determines the subband weights using IER before training.
+
+### 1. Import SFL
 
 ```python
 from spatial_frequency_loss import SpatialFrequencyLoss
+```
 
+### 2. Initialize SFL
+
+```python
 sfl = SpatialFrequencyLoss(
     num_image_channels=3,
     base_scale=0.6,
     num_subbands=7,
     ier_update_mode="calibration",
-)
-sfl = sfl.to(device)
+).to(device)
 ```
 
-To select the compatibility backend explicitly:
+`ier_update_mode="calibration"` is written explicitly for clarity, although
+`"calibration"` is the default IER update mode. The default filter backend is
+`"separable"`. The values `base_scale=0.6` and `num_subbands=7` match the
+published experiments for RGB images.
+
+### 3. Determine the subband weights using IER
+
+```python
+model.eval()
+sfl.eval()
+
+with torch.no_grad():
+    for inputs, targets in calibration_loader:
+        inputs = inputs.to(device)
+        targets = targets.to(device)
+
+        outputs = model(inputs)
+
+        sfl.accumulate_calibration_ier(
+            outputs,
+            targets,
+        )
+
+sfl.finalize_ier_calibration()
+```
+
+The model forward pass and DataLoader traversal remain responsibilities of the
+training program. This is a forward-only calibration pass: model parameters are
+not updated. `accumulate_calibration_ier()` collects the IER statistics, and
+`finalize_ier_calibration()` sets the subband weights from the accumulated
+statistics.
+
+### 4. Train the model with SFL
+
+```python
+model.train()
+sfl.train()
+
+for epoch in range(num_epochs):
+    for inputs, targets in train_loader:
+        inputs = inputs.to(device)
+        targets = targets.to(device)
+
+        optimizer.zero_grad()
+
+        outputs = model(inputs)
+
+        l2_loss = loss_function(
+            outputs,
+            targets,
+        )
+
+        (
+            subband_losses,
+            weighted_sfl,
+            _,
+            _,
+            _,
+        ) = sfl(
+            outputs,
+            targets,
+        )
+
+        total_loss = l2_loss + weighted_sfl
+
+        total_loss.backward()
+        optimizer.step()
+```
+
+The calibration step determines the subband weights only. During optimization,
+the weighted SFL is simply added to the existing pixel-wise L2 loss.
+
+## IER calibration workflow
+
+1. Construct SFL with `ier_update_mode="calibration"`.
+2. Set the model and SFL module to evaluation mode.
+3. Traverse the calibration data without gradient computation or optimizer
+   updates.
+4. Pass each generated-target pair to `accumulate_calibration_ier()`.
+5. Call `finalize_ier_calibration()` once after the complete calibration pass.
+6. Start normal optimization and call SFL through `forward()`.
+
+The default `ier_reduction="sample"` computes one IER vector per sample and
+averages the vectors over all calibration samples. The alternative
+`ier_reduction="batch"` computes one vector from the batch-mean losses and
+averages the vectors across calibration batches.
+
+After `finalize_ier_calibration()` has been called, the calibrated weights are
+fixed during optimization. To repeat calibration, construct a new SFL module.
+
+## Initialization parameters
+
+| Parameter | Default | Description |
+|---|---:|---|
+| `num_image_channels` | Required | Number of image channels. |
+| `base_scale` | Required | Base Gaussian scale. The published RGB experiments used `0.6`. |
+| `num_subbands` | Required | Number of SFL subbands. The published experiments used `7`. |
+| `scale_radix` | `2.0` | Ratio between adjacent Gaussian scales. |
+| `filter_size_factor` | `8.0` | Factor used to determine each finite filter size. |
+| `filter_backend` | `"separable"` | `"separable"` is recommended; `"conv2d"` is retained for compatibility and validation. |
+| `ier_update_mode` | `"calibration"` | `"calibration"` determines weights from a forward-only pass; `"fixed"` uses supplied weights. |
+| `ier_reduction` | `"sample"` | Averages sample-wise or batch-wise IER vectors. |
+| `eps` | `1.0e-12` | Positive lower bound for IER denominators. |
+| `subband_weights` | `None` | Explicit weights. Required when `ier_update_mode="fixed"`. |
+| `normalize_gaussian` | `False` | Whether each finite Gaussian kernel is normalized to sum to one. |
+
+### Explicitly fixed subband weights
+
+Use fixed mode when the subband weights are already known.
+
+```python
+sfl = SpatialFrequencyLoss(
+    num_image_channels=3,
+    base_scale=0.6,
+    num_subbands=7,
+    ier_update_mode="fixed",
+    subband_weights=[
+        weight_sb1,
+        weight_sb2,
+        weight_sb3,
+        weight_sb4,
+        weight_sb5,
+        weight_sb6,
+        weight_sb7,
+    ],
+).to(device)
+```
+
+## Return values
+
+Calling SFL returns five values:
+
+```python
+(
+    subband_losses,
+    weighted_sfl,
+    generated_subbands,
+    target_subbands,
+    active_weights,
+) = sfl(
+    outputs,
+    targets,
+)
+```
+
+- `subband_losses`: one batch-mean L2 loss per subband.
+- `weighted_sfl`: scalar weighted sum of the subband losses.
+- `generated_subbands`: generated-image subbands in high-to-low spatial-frequency
+  order.
+- `target_subbands`: target-image subbands in the same order.
+- `active_weights`: detached copy of the active subband weights.
+
+The public `filter_bank()` method may also be used when the subband images are
+needed explicitly.
+
+```python
+generated_subbands = sfl.filter_bank(outputs)
+```
+
+## Filter backends
+
+### Separable backend
+
+The default `"separable"` backend applies each isotropic Gaussian as consecutive
+horizontal and vertical depthwise convolutions. It is mathematically equivalent
+to the corresponding two-dimensional Gaussian filtering operation and is the
+recommended backend for normal use.
+
+### Conv2d backend
+
+The `"conv2d"` backend applies two-dimensional depthwise Gaussian convolution.
+It was the initial implementation used throughout the paper to maintain fair
+comparisons across the reported experiments. It remains available for
+compatibility and numerical validation.
 
 ```python
 sfl = SpatialFrequencyLoss(
@@ -35,50 +261,51 @@ sfl = SpatialFrequencyLoss(
     num_subbands=7,
     filter_backend="conv2d",
     ier_update_mode="calibration",
+).to(device)
+```
+
+The test suite checks agreement between the backends within floating-point
+numerical tolerances.
+
+## Checkpoint save and restore
+
+The active IER weights, accumulated calibration statistics, observation count,
+and calibration-ready state are persistent buffers in `state_dict()`.
+
+```python
+torch.save(
+    {
+        "model": model.state_dict(),
+        "sfl": sfl.state_dict(),
+        "optimizer": optimizer.state_dict(),
+    },
+    checkpoint_path,
 )
 ```
 
-## IER calibration
-
-The model forward pass and DataLoader traversal remain responsibilities of the
-training program. Before optimization, accumulate IER statistics over the
-calibration data and finalize the fixed weights.
+Reconstruct the model and SFL module with the intended configuration before
+loading the checkpoint.
 
 ```python
-model.eval()
-with torch.no_grad():
-    for inputs, targets in calibration_loader:
-        inputs = inputs.to(device)
-        targets = targets.to(device)
-        outputs = model(inputs)
-        sfl.accumulate_calibration_ier(outputs, targets)
+checkpoint = torch.load(
+    checkpoint_path,
+    map_location=device,
+)
 
-sfl.finalize_ier_calibration()
+model.load_state_dict(checkpoint["model"])
+sfl.load_state_dict(checkpoint["sfl"])
+optimizer.load_state_dict(checkpoint["optimizer"])
 ```
 
-During optimization:
-
-```python
-subband_losses, weighted_sfl, _, _, active_weights = sfl(outputs, targets)
-total_loss = reconstruction_loss + quantizer_loss + weighted_sfl
-```
-
-For explicitly supplied weights, use `ier_update_mode="fixed"` together with
-`subband_weights=[...]`.
-
-## Checkpoint behavior
-
-IER weights and calibration state are persistent buffers in `state_dict()`.
-Save and restore the SFL module state together with the model and optimizer.
-The filter backend itself is a construction-time configuration and must match
-the intended checkpoint configuration.
+`filter_backend` is a construction-time configuration and is not selected by
+`state_dict()`. Construct SFL with the backend intended for the restored run.
 
 ## Computation time
 
-The paper reported computation time using FFHQ with 40,000 images resized to
-256 x 256, batch size 4, and three complete epochs of 10,000 iterations each.
-The measured interval included GPU transfer, forward propagation, loss
-computation, backward propagation, and the optimizer update.
+The paper measured FFHQ training with 40,000 images resized to 256 x 256, batch
+size 4, and three complete epochs of 10,000 iterations each. The interval
+included GPU transfer, forward propagation, loss computation, backward
+propagation, and the optimizer update.
 
 | Loss condition | Training time (ms/iteration) | Relative time |
 |---|---:|---:|
@@ -86,38 +313,65 @@ computation, backward propagation, and the optimizer update.
 | Baseline + FFL | 52.15 +/- 0.033 | 1.03 |
 | Baseline + FRL | 59.67 +/- 0.063 | 1.18 |
 | Baseline + SFL, conv2d | 267.9 +/- 0.724 | 5.31 |
-| **Baseline + SFL, separable** | **66.851 +/- 0.021** | **1.324** |
+| **Baseline + SFL, separable** | **66.85 +/- 0.021** | **1.32** |
 
-The first four rows are from Table 6 of the paper. The separable backend was
-implemented after publication and was therefore not available for the original
-evaluation. The paper used the initial conv2d implementation of SFL to ensure a
-fair comparison with the other methods under the implementation available at
-that time.
+The first four rows are from Table 6 of the paper, where FFL and FRL stand for
+Focal Frequency Loss and Feature Reconstruction Loss, respectively. The
+original SFL implementation used the conv2d backend, which was retained
+throughout the paper to ensure fair comparisons across experiments. Because
+separable filtering is mathematically equivalent and substantially faster, the
+separable backend was implemented after publication and is used as the default
+in the public software.
 
-The separable result is an additional post-publication measurement performed
-with the same hardware, software environment, measurement interval, and
-statistical procedure as the paper. The separable implementation was
-approximately 4.01 times faster than the original conv2d implementation and
-reduced SFL training time by approximately 75.05%. The two backends implement
-the same mathematical filtering operation.
+A post-publication measurement using the same measurement procedure found an
+approximately 4.01-fold speed-up over the original SFL implementation and an
+approximately 75.05% reduction in SFL training time. GPU-memory values are not
+included because allocator-based peak-memory measurements are
+implementation-dependent and require cautious interpretation.
 
-GPU-memory values are not included in this additional comparison because
-allocator-based peak-memory measurements are implementation-dependent and
-require cautious interpretation.
+## Testing
 
-## Public scope
-
-This public implementation includes `fixed` and `calibration` IER modes.
-Dynamic weight control is not included.
-
-## Paper
-
-Naoyuki Ichimura, "Spatial frequency loss for mitigating spectral bias in deep
-neural networks," Machine Vision and Applications 37, 173 (2026).
-DOI: 10.1007/s00138-026-01927-5
-
-## Tests
+Run the public test suite from the repository root.
 
 ```bash
 python3 -m pytest -q
 ```
+
+The tests cover the public SFL implementation, including filter-backend
+agreement, IER calibration and fixed-weight behavior, and persistent module
+state where applicable.
+
+## Public repository scope
+
+This repository contains the public SFL implementation, documentation, and SFL
+unit tests. The public API supports calibrated and explicitly fixed IER weights.
+
+The repository does not include the experimental VQ-VAE models, complete
+training programs, private benchmark scripts, logs, checkpoints, result JSON
+files, or research-only dynamic weight-control development.
+
+## Results and project information
+
+The published experiments evaluated SFL with VQ-VAE models on FFHQ and
+COCO2017. SFL improved the reported validation image-quality metrics and reduced
+high-frequency subband losses relative to the pixel-wise baseline. See the
+[project page](docs/index.html) for visual examples, quantitative tables,
+computation-time context, and post-publication information.
+
+## Paper
+
+Naoyuki Ichimura, "Spatial frequency loss for mitigating spectral bias in deep
+neural networks," *Machine Vision and Applications* 37, 173 (2026).
+[DOI: 10.1007/s00138-026-01927-5](https://doi.org/10.1007/s00138-026-01927-5)
+
+## Citation
+
+A machine-readable `CITATION.cff` file will be added to the repository. Until
+then, cite the paper using the bibliographic information above.
+
+## License
+
+See `LICENSE` for the software license.
+
+© 2026 Naoyuki Ichimura. All rights reserved for the original documentation and
+project-page content, except where otherwise noted.
