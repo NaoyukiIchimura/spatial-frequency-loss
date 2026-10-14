@@ -405,7 +405,12 @@ then, cite the paper using the bibliographic information above.
 
 ## License
 
-See `LICENSE` for the software license.
+The Spatial Frequency Loss software is licensed under the GNU General Public
+License, version 3 only (`GPL-3.0-only`). Commercial use, modification, and
+redistribution are permitted under the terms of the license. If a modified
+version of the SFL or a derivative program based on the SFL is distributed, the
+corresponding source code must be provided under GPLv3.
 
-© 2026 Naoyuki Ichimura. All rights reserved for the original documentation and
-project-page content, except where otherwise noted.
+See [LICENSE](LICENSE) for the complete license terms.
+
+Copyright (C) 2026 Naoyuki Ichimura

@@ -1,6 +1,9 @@
 #
 # spatial_frequency_loss.py
 #
+# Copyright (C) 2026 Naoyuki Ichimura
+# SPDX-License-Identifier: GPL-3.0-only
+#
 # Spatial Frequency Loss (SFL) with integrated IER weight management.
 #
 
