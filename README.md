@@ -400,9 +400,12 @@ neural networks," *Machine Vision and Applications* 37, 173 (2026).
 
 ## Citation
 
-A machine-readable `CITATION.cff` file will be added to the repository. Until
-then, cite the paper using the bibliographic information above.
+Citation metadata are provided in [CITATION.cff](CITATION.cff). GitHub users can
+also select **Cite this repository** on the repository page to obtain formatted
+citation information.
 
+When citing the SFL method and its experimental evaluation, please cite the
+paper listed above.
 ## License
 
 The Spatial Frequency Loss software is licensed under the GNU General Public
