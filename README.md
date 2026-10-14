@@ -1,38 +1,37 @@
 # Spatial Frequency Loss
 
-Spatial Frequency Loss (SFL) is a subband-aware loss designed to mitigate
+Spatial Frequency Loss (the SFL) is a subband-aware loss designed to mitigate
 spectral bias in deep neural networks and improve the learning of fine-scale
-image structures. SFL measures reconstruction errors in overlapping
+image structures. The SFL measures reconstruction errors in overlapping
 spatial-frequency subbands produced by a Difference-of-Gaussians filter bank.
 
-- [Project page](docs/index.html)
-- [Paper](https://doi.org/10.1007/s00138-026-01927-5)
-- [View-only full text](https://rdcu.be/XSJ786PqnMca)
-- [Supplementary material](https://media.springernature.com/original/springer-static/esm/art%3A10.1007%2Fs00138-026-01927-5/MediaObjects/138_2026_1927_MOESM1_ESM.pdf)
-- [Post-publication corrections](docs/corrections.html)
+- <a href="https://naoyukiichimura.github.io/spatial-frequency-loss/" target="_blank" rel="noopener noreferrer">Project page</a>
+- <a href="https://doi.org/10.1007/s00138-026-01927-5" target="_blank" rel="noopener noreferrer">Paper</a>
+- <a href="https://rdcu.be/XSJ786PqnMca" target="_blank" rel="noopener noreferrer">View-only full text</a>
+- <a href="https://media.springernature.com/original/springer-static/esm/art%3A10.1007%2Fs00138-026-01927-5/MediaObjects/138_2026_1927_MOESM1_ESM.pdf" target="_blank" rel="noopener noreferrer">Supplementary material</a>
+- <a href="https://naoyukiichimura.github.io/spatial-frequency-loss/corrections.html" target="_blank" rel="noopener noreferrer">Post-publication corrections</a>
 
 ## Key features
 
 - **Frequency-selective measurements:** A Difference-of-Gaussians filter bank
   measures discrepancies between corresponding spatial-frequency responses of
-  generated and target images.
+  output and target images.
 - **Data-driven subband weighting:** The Inverse Error Ratio (IER) method
-  determines the subband weights automatically from calibration data.
-- **Fidelity-oriented learning:** SFL does not require adversarial training or
+  determines the subband weights automatically from the training data.
+- **Fidelity-oriented learning:** The SFL does not require adversarial training or
   nonlinear features from a pre-trained model. In the evaluated experiments,
-  SFL improved fine-scale image structures without introducing noticeable
+  the SFL improved fine-scale image structures without introducing noticeable
   additional artifacts.
-- **Minimal integration:** SFL is a regular PyTorch module. Existing model
+- **Minimal integration:** The SFL is implemented as a regular PyTorch module. Existing model
   architectures, data loaders, optimizers, and training loops require only
   small, localized additions.
 - **Efficient default backend:** Separable filtering is the recommended default
   backend. The original two-dimensional convolution backend remains available
   for compatibility and numerical validation.
 
-The fidelity-oriented design may be particularly valuable when artificially
+The fidelity-oriented design of the SFL may be particularly valuable when artificially
 generated structures are undesirable, including potential applications in
-medical imaging and physics-based image processing. These application areas
-were not directly evaluated in the published experiments.
+medical imaging and physics-based image processing.
 
 ## Requirements
 
@@ -54,21 +53,20 @@ git clone https://github.com/NaoyukiIchimura/spatial-frequency-loss.git
 cd spatial-frequency-loss
 ```
 
-The repository will be updated with package-installation instructions when a
-packaged release becomes available.
-
 ## Quick start
 
-The following example shows the simplest workflow in which SFL automatically
+The following example shows the simplest workflow in which the SFL automatically
 determines the subband weights using IER before training.
 
-### 1. Import SFL
+### 1. Import the SFL
 
 ```python
+import torch
+
 from spatial_frequency_loss import SpatialFrequencyLoss
 ```
 
-### 2. Initialize SFL
+### 2. Initialize the SFL
 
 ```python
 sfl = SpatialFrequencyLoss(
@@ -77,6 +75,8 @@ sfl = SpatialFrequencyLoss(
     num_subbands=7,
     ier_update_mode="calibration",
 ).to(device)
+
+mse_loss = torch.nn.MSELoss()
 ```
 
 `ier_update_mode="calibration"` is written explicitly for clarity, although
@@ -91,7 +91,7 @@ model.eval()
 sfl.eval()
 
 with torch.no_grad():
-    for inputs, targets in calibration_loader:
+    for inputs, targets in training_loader:
         inputs = inputs.to(device)
         targets = targets.to(device)
 
@@ -106,12 +106,13 @@ sfl.finalize_ier_calibration()
 ```
 
 The model forward pass and DataLoader traversal remain responsibilities of the
-training program. This is a forward-only calibration pass: model parameters are
+training program. The same training data are used for this forward-only IER pass,
+and model parameters are
 not updated. `accumulate_calibration_ier()` collects the IER statistics, and
 `finalize_ier_calibration()` sets the subband weights from the accumulated
 statistics.
 
-### 4. Train the model with SFL
+### 4. Train the model with the SFL
 
 ```python
 model.train()
@@ -126,7 +127,7 @@ for epoch in range(num_epochs):
 
         outputs = model(inputs)
 
-        l2_loss = loss_function(
+        l2_loss = mse_loss(
             outputs,
             targets,
         )
@@ -154,15 +155,15 @@ the weighted SFL is simply added to the existing pixel-wise L2 loss.
 ## IER calibration workflow
 
 1. Construct SFL with `ier_update_mode="calibration"`.
-2. Set the model and SFL module to evaluation mode.
-3. Traverse the calibration data without gradient computation or optimizer
+2. Set the model and the SFL module to evaluation mode.
+3. Traverse the training data without gradient computation or optimizer
    updates.
-4. Pass each generated-target pair to `accumulate_calibration_ier()`.
+4. Pass each output-target pair to `accumulate_calibration_ier()`.
 5. Call `finalize_ier_calibration()` once after the complete calibration pass.
-6. Start normal optimization and call SFL through `forward()`.
+6. Start normal optimization and call the SFL through `forward()`.
 
 The default `ier_reduction="sample"` computes one IER vector per sample and
-averages the vectors over all calibration samples. The alternative
+averages the vectors over all training samples. The alternative
 `ier_reduction="batch"` computes one vector from the batch-mean losses and
 averages the vectors across calibration batches.
 
@@ -175,7 +176,7 @@ fixed during optimization. To repeat calibration, construct a new SFL module.
 |---|---:|---|
 | `num_image_channels` | Required | Number of image channels. |
 | `base_scale` | Required | Base Gaussian scale. The published RGB experiments used `0.6`. |
-| `num_subbands` | Required | Number of SFL subbands. The published experiments used `7`. |
+| `num_subbands` | Required | Number of the SFL subbands. The published experiments used `7`. |
 | `scale_radix` | `2.0` | Ratio between adjacent Gaussian scales. |
 | `filter_size_factor` | `8.0` | Factor used to determine each finite filter size. |
 | `filter_backend` | `"separable"` | `"separable"` is recommended; `"conv2d"` is retained for compatibility and validation. |
@@ -209,13 +210,13 @@ sfl = SpatialFrequencyLoss(
 
 ## Return values
 
-Calling SFL returns five values:
+Calling the SFL returns five values:
 
 ```python
 (
     subband_losses,
     weighted_sfl,
-    generated_subbands,
+    output_subbands,
     target_subbands,
     active_weights,
 ) = sfl(
@@ -226,7 +227,7 @@ Calling SFL returns five values:
 
 - `subband_losses`: one batch-mean L2 loss per subband.
 - `weighted_sfl`: scalar weighted sum of the subband losses.
-- `generated_subbands`: generated-image subbands in high-to-low spatial-frequency
+- `output_subbands`: output-image subbands in high-to-low spatial-frequency
   order.
 - `target_subbands`: target-image subbands in the same order.
 - `active_weights`: detached copy of the active subband weights.
@@ -235,7 +236,7 @@ The public `filter_bank()` method may also be used when the subband images are
 needed explicitly.
 
 ```python
-generated_subbands = sfl.filter_bank(outputs)
+output_subbands = sfl.filter_bank(outputs)
 ```
 
 ## Filter backends
@@ -325,9 +326,7 @@ in the public software.
 
 A post-publication measurement using the same measurement procedure found an
 approximately 4.01-fold speed-up over the original SFL implementation and an
-approximately 75.05% reduction in SFL training time. GPU-memory values are not
-included because allocator-based peak-memory measurements are
-implementation-dependent and require cautious interpretation.
+approximately 75.05% reduction in the SFL training time.
 
 ## Testing
 
@@ -337,32 +336,28 @@ Run the public test suite from the repository root.
 python3 -m pytest -q
 ```
 
-The tests cover the public SFL implementation, including filter-backend
-agreement, IER calibration and fixed-weight behavior, and persistent module
-state where applicable.
+This command asks pytest to discover and execute the public test files in the
+repository. The `-q` option selects quieter output. The individual test cases
+should be reviewed separately before a detailed coverage list is added here.
 
 ## Public repository scope
 
-This repository contains the public SFL implementation, documentation, and SFL
-unit tests. The public API supports calibrated and explicitly fixed IER weights.
-
-The repository does not include the experimental VQ-VAE models, complete
-training programs, private benchmark scripts, logs, checkpoints, result JSON
-files, or research-only dynamic weight-control development.
+This repository contains the public SFL implementation, documentation, and unit
+tests. The public API supports calibrated and explicitly fixed IER weights.
 
 ## Results and project information
 
-The published experiments evaluated SFL with VQ-VAE models on FFHQ and
-COCO2017. SFL improved the reported validation image-quality metrics and reduced
+The published experiments evaluated the SFL with VQ-VAE models on FFHQ and
+COCO2017. The SFL improved the reported validation image-quality metrics and reduced
 high-frequency subband losses relative to the pixel-wise baseline. See the
-[project page](docs/index.html) for visual examples, quantitative tables,
+<a href="https://naoyukiichimura.github.io/spatial-frequency-loss/" target="_blank" rel="noopener noreferrer">project page</a> for visual examples, quantitative tables,
 computation-time context, and post-publication information.
 
 ## Paper
 
 Naoyuki Ichimura, "Spatial frequency loss for mitigating spectral bias in deep
 neural networks," *Machine Vision and Applications* 37, 173 (2026).
-[DOI: 10.1007/s00138-026-01927-5](https://doi.org/10.1007/s00138-026-01927-5)
+<a href="https://doi.org/10.1007/s00138-026-01927-5" target="_blank" rel="noopener noreferrer">DOI: 10.1007/s00138-026-01927-5</a>
 
 ## Citation
 
