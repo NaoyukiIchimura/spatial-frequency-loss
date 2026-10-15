@@ -186,3 +186,150 @@ def test_invalid_ier_mode_is_rejected() -> None:
             num_subbands=3,
             ier_update_mode="unsupported",
         )
+
+# Command
+# -------
+# python3 -m pytest -q tests/test_spatial_frequency_loss_ier_modes.py::test_default_ier_reduction_is_sample
+#
+# Summary
+# -------
+# test_default_ier_reduction_is_sample verifies the public default reduction.
+#
+# Parameters
+# ----------
+# None
+#
+# Returns
+# -------
+# None
+def test_default_ier_reduction_is_sample() -> None:
+    loss_module = SpatialFrequencyLoss(
+        num_image_channels=3,
+        base_scale=0.8,
+        num_subbands=3,
+        ier_update_mode="calibration",
+    )
+
+    assert loss_module.ier_reduction == "sample", (
+        "The default IER reduction must be 'sample' to match the "
+        "sample-wise IER definition, but received "
+        f"ier_reduction={loss_module.ier_reduction!r}."
+    )
+
+
+# Command
+# -------
+# python3 -m pytest -q tests/test_spatial_frequency_loss_ier_modes.py::test_sample_ier_reduction_averages_sample_wise_ratios
+#
+# Summary
+# -------
+# test_sample_ier_reduction_averages_sample_wise_ratios verifies sample reduction.
+#
+# Parameters
+# ----------
+# None
+#
+# Returns
+# -------
+# None
+def test_sample_ier_reduction_averages_sample_wise_ratios() -> None:
+    loss_module = SpatialFrequencyLoss(
+        num_image_channels=3,
+        base_scale=0.8,
+        num_subbands=2,
+        ier_update_mode="calibration",
+        ier_reduction="sample",
+    )
+    pixel_loss = torch.tensor(5.0)
+    subband_losses = torch.tensor([2.5, 3.0])
+    sample_pixel_losses = torch.tensor([2.0, 8.0])
+    sample_subband_losses = torch.tensor(
+        [
+            [1.0, 4.0],
+            [4.0, 2.0],
+        ]
+    )
+
+    ier_sum_contribution, num_observations = (
+        loss_module._compute_ier_contribution(
+            pixel_loss,
+            subband_losses,
+            sample_pixel_losses,
+            sample_subband_losses,
+        )
+    )
+    actual_ier_weights = ier_sum_contribution / num_observations
+    expected_ier_weights = torch.tensor(
+        [2.0, 2.25],
+        dtype=torch.float64,
+    )
+
+    assert num_observations == 2, (
+        "Sample reduction must count one IER observation per sample, but "
+        f"received num_observations={num_observations}."
+    )
+    torch.testing.assert_close(
+        actual_ier_weights,
+        expected_ier_weights,
+        rtol=0.0,
+        atol=0.0,
+    )
+
+
+# Command
+# -------
+# python3 -m pytest -q tests/test_spatial_frequency_loss_ier_modes.py::test_batch_ier_reduction_uses_ratio_of_batch_mean_losses
+#
+# Summary
+# -------
+# test_batch_ier_reduction_uses_ratio_of_batch_mean_losses verifies batch reduction.
+#
+# Parameters
+# ----------
+# None
+#
+# Returns
+# -------
+# None
+def test_batch_ier_reduction_uses_ratio_of_batch_mean_losses() -> None:
+    loss_module = SpatialFrequencyLoss(
+        num_image_channels=3,
+        base_scale=0.8,
+        num_subbands=2,
+        ier_update_mode="calibration",
+        ier_reduction="batch",
+    )
+    pixel_loss = torch.tensor(5.0)
+    subband_losses = torch.tensor([2.5, 3.0])
+    sample_pixel_losses = torch.tensor([2.0, 8.0])
+    sample_subband_losses = torch.tensor(
+        [
+            [1.0, 4.0],
+            [4.0, 2.0],
+        ]
+    )
+
+    ier_sum_contribution, num_observations = (
+        loss_module._compute_ier_contribution(
+            pixel_loss,
+            subband_losses,
+            sample_pixel_losses,
+            sample_subband_losses,
+        )
+    )
+    expected_ier_weights = torch.tensor(
+        [2.0, 5.0 / 3.0],
+        dtype=torch.float32,
+    ).to(torch.float64)
+
+    assert num_observations == 1, (
+        "Batch reduction must count one IER observation per batch, but "
+        f"received num_observations={num_observations}."
+    )
+    torch.testing.assert_close(
+        ier_sum_contribution,
+        expected_ier_weights,
+        rtol=0.0,
+        atol=0.0,
+    )
+
