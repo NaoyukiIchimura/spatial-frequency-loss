@@ -332,4 +332,3 @@ def test_batch_ier_reduction_uses_ratio_of_batch_mean_losses() -> None:
         rtol=0.0,
         atol=0.0,
     )
-
