@@ -16,7 +16,7 @@ spatial-frequency subbands produced by a Difference-of-Gaussians filter bank.
 - **Frequency-selective measurements:** A Difference-of-Gaussians filter bank
   measures discrepancies between corresponding spatial-frequency responses of
   output and target images.
-- **Data-driven subband weighting:** The Inverse Error Ratio (IER) method
+- **Data-driven subband weighting:** The Inverse Error Ratio (IER)
   determines the subband weights automatically from the training data.
 - **Fidelity-oriented learning:** The SFL does not require adversarial training or
   nonlinear features from a pre-trained model. In the evaluated experiments,
@@ -56,7 +56,7 @@ cd spatial-frequency-loss
 ## Quick start
 
 The following example shows the simplest workflow in which the SFL automatically
-determines the subband weights using IER before training.
+determines the subband weights using the IER before training.
 
 ### 1. Import the SFL
 
@@ -80,11 +80,11 @@ mse_loss = torch.nn.MSELoss()
 ```
 
 `ier_update_mode="calibration"` is written explicitly for clarity, although
-`"calibration"` is the default IER update mode. The default filter backend is
+`"calibration"` is the default update mode for the IER. The default filter backend is
 `"separable"`. The values `base_scale=0.6` and `num_subbands=7` match the
 published experiments for RGB images.
 
-### 3. Determine the subband weights using IER
+### 3. Determine the subband weights using the IER
 
 ```python
 model.eval()
@@ -106,7 +106,7 @@ sfl.finalize_ier_calibration()
 ```
 
 The model forward pass and DataLoader traversal remain responsibilities of the
-training program. The same training data are used for this forward-only IER pass,
+training program. The same training data are used for this forward-only pass for the IER,
 and model parameters are
 not updated. `accumulate_calibration_ier()` collects the IER statistics, and
 `finalize_ier_calibration()` sets the subband weights from the accumulated
@@ -309,7 +309,7 @@ numerical tolerances.
 
 ## Checkpoint save and restore
 
-The active IER weights, accumulated calibration statistics, observation count,
+The active weights based on the IER, accumulated calibration statistics, observation count,
 and calibration-ready state are persistent buffers in `state_dict()`.
 
 ```python
@@ -382,7 +382,7 @@ should be reviewed separately before a detailed coverage list is added here.
 ## Public repository scope
 
 This repository contains the public SFL implementation, documentation, and unit
-tests. The public API supports calibrated and explicitly fixed IER weights.
+tests. The public API supports calibrated and explicitly fixed weights based on the IER.
 
 ## Results and project information
 
