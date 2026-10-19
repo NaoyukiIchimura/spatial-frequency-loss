@@ -79,7 +79,7 @@ where $\sigma_s$ is the scale of the Difference-of-Gaussians filter for
 subband $s$. The Spatial Frequency Loss is the weighted sum of the corresponding
 subband losses:
 
-$$
+```math
 \mathcal{L}_{\mathrm{SFL}}
 =
 \frac{1}{N}
@@ -88,11 +88,10 @@ $$
 \sum_{s=1}^{S}
 w_{\mathrm{SFL}}(\sigma_s)
 E_{\mathrm{SFL}}(k \mid \sigma_s)
-\right\}.
-\tag{13}
-$$
+\right\} \qquad \text{(13)}.
+```
 
-$$
+```math
 E_{\mathrm{SFL}}(k \mid \sigma_s)
 =
 \frac{1}{C W_k H_k}
@@ -103,9 +102,8 @@ E_{\mathrm{SFL}}(k \mid \sigma_s)
 I_k^o(c,h,w \mid \sigma_s)
 -
 I_k^t(c,h,w \mid \sigma_s)
-\right\}^{2}.
-\tag{14}
-$$
+\right\}^{2} \qquad \text{(14)}.
+```
 
 Here, $E_{\mathrm{SFL}}(k \mid \sigma_s)$ is the subband loss at scale
 $\sigma_s$, and $w_{\mathrm{SFL}}(\sigma_s)$ is its weight. Smaller Gaussian
@@ -116,15 +114,14 @@ high-spatial-frequency components.
 The Inverse Error Ratio compares the pixel-wise L2 error over the entire image
 with the error in each subband:
 
-$$
+```math
 \operatorname{IER}(k \mid \sigma_s)
 =
 \frac{E_{\mathrm{L2}}(k)}
-{E_{\mathrm{SFL}}(k \mid \sigma_s)}.
-\tag{15}
-$$
+{E_{\mathrm{SFL}}(k \mid \sigma_s)} \qquad \text{(15)}.
+```
 
-$$
+```math
 E_{\mathrm{L2}}(k)
 =
 \frac{1}{C W_k H_k}
@@ -133,23 +130,21 @@ E_{\mathrm{L2}}(k)
 \sum_{w=1}^{W_k}
 \left\{
 I_k^o(c,h,w)-I_k^t(c,h,w)
-\right\}^{2}.
-\tag{16}
-$$
+\right\}^{2} \qquad \text{(16)}.
+```
 
 A subband with a smaller reconstruction error receives a larger IER value. In
 natural-image datasets, high-frequency subbands generally have lower energy and
 smaller losses, so the IER tends to assign larger values to these subbands. The
 subband weights are obtained by averaging the IER over the calibration data:
 
-$$
+```math
 w_{\mathrm{SFL}}(\sigma_s)
 =
 \frac{1}{N}
 \sum_{k=1}^{N}
-\operatorname{IER}(k \mid \sigma_s).
-\tag{17}
-$$
+\operatorname{IER}(k \mid \sigma_s) \qquad \text{(17)}.
+```
 
 This data-driven weighting gives greater emphasis to subbands with smaller
 initial errors and helps balance learning across spatial frequencies. In the
