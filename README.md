@@ -115,7 +115,7 @@ The Inverse Error Ratio compares the pixel-wise L2 error over the entire image
 with the error in each subband:
 
 ```math
-\operatorname{IER}(k \mid \sigma_s)
+\mathrm{IER}(k \mid \sigma_s)
 =
 \frac{E_{\mathrm{L2}}(k)}
 {E_{\mathrm{SFL}}(k \mid \sigma_s)} \qquad \text{(15)}.
@@ -143,7 +143,7 @@ w_{\mathrm{SFL}}(\sigma_s)
 =
 \frac{1}{N}
 \sum_{k=1}^{N}
-\operatorname{IER}(k \mid \sigma_s) \qquad \text{(17)}.
+\mathrm{IER}(k \mid \sigma_s) \qquad \text{(17)}.
 ```
 
 This data-driven weighting gives greater emphasis to subbands with smaller
