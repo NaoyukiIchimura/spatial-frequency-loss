@@ -35,8 +35,8 @@ jobs:
       - name: Check distribution metadata
         run: |
           python3 -m twine check \
-            dist/spatial_frequency_loss-1.0.1.post1-py3-none-any.whl \
-            dist/spatial_frequency_loss-1.0.1.post1.tar.gz
+            dist/spatial_frequency_loss-1.0.1.post2-py3-none-any.whl \
+            dist/spatial_frequency_loss-1.0.1.post2.tar.gz
 
       - name: Upload distributions as workflow artifact
         uses: actions/upload-artifact@v4

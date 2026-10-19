@@ -51,7 +51,7 @@ Use versions compatible with the PyTorch environment of the target project.
 For most users, install the released package from PyPI:
 
 ```bash
-python3 -m pip install spatial-frequency-loss==1.0.1.post1
+python3 -m pip install spatial-frequency-loss==1.0.1.post2
 ```
 
 ### Install from GitHub
@@ -70,93 +70,23 @@ existing project when a local single-file integration is preferred.
 
 ## Definitions of the SFL and the IER
 
-The equations below are shown as LaTeX source for compatibility with the PyPI
-project-description renderer. See the
-[project page](https://naoyukiichimura.github.io/spatial-frequency-loss/#definitions)
-for fully rendered equations.
-
-
-Let $I_k^o(c,h,w)$ and $I_k^t(c,h,w)$ denote the output and target images
-of sample $k$, respectively, where $c$, $h$, and $w$ are the channel,
-vertical-coordinate, and horizontal-coordinate indices. Their responses in the
-$s$-th Difference-of-Gaussians subband are denoted by
-$I_k^o(c,h,w \mid \sigma_s)$ and $I_k^t(c,h,w \mid \sigma_s)$, respectively,
-where $\sigma_s$ is the scale of the Difference-of-Gaussians filter for
-subband $s$. The Spatial Frequency Loss is the weighted sum of the corresponding
-subband losses:
-
-```text
-\mathcal{L}_{\mathrm{SFL}}
-=
-\frac{1}{N}
-\sum_{k=1}^{N}
-\left\{
-\sum_{s=1}^{S}
-w_{\mathrm{SFL}}(\sigma_s)
-E_{\mathrm{SFL}}(k \mid \sigma_s)
-\right\} \qquad \text{(13)},
-```
-
-```text
-E_{\mathrm{SFL}}(k \mid \sigma_s)
-=
-\frac{1}{C W_k H_k}
-\sum_{c=1}^{C}
-\sum_{h=1}^{H_k}
-\sum_{w=1}^{W_k}
-\left\{
-I_k^o(c,h,w \mid \sigma_s)
--
-I_k^t(c,h,w \mid \sigma_s)
-\right\}^{2} \qquad \text{(14)}.
-```
-
-Here, $E_{\mathrm{SFL}}(k \mid \sigma_s)$ is the subband loss at scale
-$\sigma_s$, and $w_{\mathrm{SFL}}(\sigma_s)$ is its weight. Smaller Gaussian
-scales correspond approximately to higher spatial frequencies. A large loss at
-a smaller scale therefore indicates insufficient reconstruction of
-high-spatial-frequency components.
+The Spatial Frequency Loss is a weighted sum of the L2 errors computed between
+corresponding Difference-of-Gaussians subband responses of the output and
+target images. Smaller Gaussian scales correspond approximately to higher
+spatial frequencies, so the subband losses quantify reconstruction errors from
+higher to lower spatial-frequency ranges.
 
 The Inverse Error Ratio compares the pixel-wise L2 error over the entire image
-with the error in each subband:
+with the error in each subband. A subband with a smaller reconstruction error
+receives a larger IER value. The subband weights are obtained by averaging the
+IER over the calibration data, which helps balance learning across spatial
+frequencies. In the public implementation, the calibration workflow estimates
+these weights before normal optimization and then keeps the calibrated weights
+fixed during training.
 
-```text
-\mathrm{IER}(k \mid \sigma_s)
-=
-\frac{E_{\mathrm{L2}}(k)}
-{E_{\mathrm{SFL}}(k \mid \sigma_s)} \qquad \text{(15)},
-```
-
-```text
-E_{\mathrm{L2}}(k)
-=
-\frac{1}{C W_k H_k}
-\sum_{c=1}^{C}
-\sum_{h=1}^{H_k}
-\sum_{w=1}^{W_k}
-\left\{
-I_k^o(c,h,w)-I_k^t(c,h,w)
-\right\}^{2} \qquad \text{(16)}.
-```
-
-A subband with a smaller reconstruction error receives a larger IER value. In
-natural-image datasets, high-frequency subbands generally have lower energy and
-smaller losses, so the IER tends to assign larger values to these subbands. The
-subband weights are obtained by averaging the IER over the calibration data:
-
-```text
-w_{\mathrm{SFL}}(\sigma_s)
-=
-\frac{1}{N}
-\sum_{k=1}^{N}
-\mathrm{IER}(k \mid \sigma_s) \qquad \text{(17)}.
-```
-
-This data-driven weighting gives greater emphasis to subbands with smaller
-initial errors and helps balance learning across spatial frequencies. In the
-public implementation, the calibration workflow estimates these weights before
-normal optimization and then keeps the calibrated weights fixed during
-training.
+See the
+[project page](https://naoyukiichimura.github.io/spatial-frequency-loss/#definitions)
+for the complete definitions and rendered Eqs. (13)-(17).
 
 ## Quick start
 
