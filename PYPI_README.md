@@ -51,7 +51,7 @@ Use versions compatible with the PyTorch environment of the target project.
 For most users, install the released package from PyPI:
 
 ```bash
-python3 -m pip install spatial-frequency-loss==1.0.1.post2
+python3 -m pip install spatial-frequency-loss==1.0.1.post3
 ```
 
 ### Install from GitHub
@@ -86,7 +86,7 @@ fixed during training.
 
 See the
 [project page](https://naoyukiichimura.github.io/spatial-frequency-loss/#definitions)
-for the complete definitions and rendered Eqs. (13)-(17).
+for the complete definitions and equations (13)-(17).
 
 ## Quick start
 
