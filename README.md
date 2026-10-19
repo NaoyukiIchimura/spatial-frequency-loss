@@ -88,7 +88,7 @@ subband losses:
 \sum_{s=1}^{S}
 w_{\mathrm{SFL}}(\sigma_s)
 E_{\mathrm{SFL}}(k \mid \sigma_s)
-\right\} \qquad \text{(13)}.
+\right\} \qquad \text{(13)},
 ```
 
 ```math
@@ -118,7 +118,7 @@ with the error in each subband:
 \mathrm{IER}(k \mid \sigma_s)
 =
 \frac{E_{\mathrm{L2}}(k)}
-{E_{\mathrm{SFL}}(k \mid \sigma_s)} \qquad \text{(15)}.
+{E_{\mathrm{SFL}}(k \mid \sigma_s)} \qquad \text{(15)},
 ```
 
 ```math
