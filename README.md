@@ -22,9 +22,10 @@ spatial-frequency subbands produced by a Difference-of-Gaussians filter bank.
   nonlinear features from a pre-trained model. In the evaluated experiments,
   the SFL improved fine-scale image structures without introducing noticeable
   additional artifacts.
-- **Minimal integration:** The SFL is implemented as a regular PyTorch module. Existing model
-  architectures, data loaders, optimizers, and training loops require only
-  small, localized additions.
+- **Minimal integration:** The SFL can be integrated without modifying the
+  model architecture, data loader, or optimizer. It is used as a regular
+  PyTorch module, and its weighted loss is simply added to the existing loss
+  function with only a minimal change to the training loop.
 - **Efficient default backend:** Separable filtering is the recommended default
   backend. The original two-dimensional convolution backend remains available
   for compatibility and numerical validation.
@@ -66,6 +67,95 @@ python3 -m pip install -e .
 
 Alternatively, `spatial_frequency_loss.py` can be copied directly into an
 existing project when a local single-file integration is preferred.
+
+## Definitions of the SFL and the IER
+
+Let $I_k^o(c,h,w)$ and $I_k^t(c,h,w)$ denote the output and target images
+of sample $k$, respectively, where $c$, $h$, and $w$ are the channel,
+vertical-coordinate, and horizontal-coordinate indices. Their responses in the
+$s$-th Difference-of-Gaussians subband are denoted by
+$I_k^o(c,h,w \mid \sigma_s)$ and $I_k^t(c,h,w \mid \sigma_s)$, respectively,
+where $\sigma_s$ is the scale of the Difference-of-Gaussians filter for
+subband $s$. The Spatial Frequency Loss is the weighted sum of the corresponding
+subband losses:
+
+$$
+\mathcal{L}_{\mathrm{SFL}}
+=
+\frac{1}{N}
+\sum_{k=1}^{N}
+\left\{
+\sum_{s=1}^{S}
+w_{\mathrm{SFL}}(\sigma_s)
+E_{\mathrm{SFL}}(k \mid \sigma_s)
+\right\}.
+\tag{13}
+$$
+
+$$
+E_{\mathrm{SFL}}(k \mid \sigma_s)
+=
+\frac{1}{C W_k H_k}
+\sum_{c=1}^{C}
+\sum_{h=1}^{H_k}
+\sum_{w=1}^{W_k}
+\left\{
+I_k^o(c,h,w \mid \sigma_s)
+-
+I_k^t(c,h,w \mid \sigma_s)
+\right\}^{2}.
+\tag{14}
+$$
+
+Here, $E_{\mathrm{SFL}}(k \mid \sigma_s)$ is the subband loss at scale
+$\sigma_s$, and $w_{\mathrm{SFL}}(\sigma_s)$ is its weight. Smaller Gaussian
+scales correspond approximately to higher spatial frequencies. A large loss at
+a smaller scale therefore indicates insufficient reconstruction of
+high-spatial-frequency components.
+
+The Inverse Error Ratio compares the pixel-wise L2 error over the entire image
+with the error in each subband:
+
+$$
+\operatorname{IER}(k \mid \sigma_s)
+=
+\frac{E_{\mathrm{L2}}(k)}
+{E_{\mathrm{SFL}}(k \mid \sigma_s)}.
+\tag{15}
+$$
+
+$$
+E_{\mathrm{L2}}(k)
+=
+\frac{1}{C W_k H_k}
+\sum_{c=1}^{C}
+\sum_{h=1}^{H_k}
+\sum_{w=1}^{W_k}
+\left\{
+I_k^o(c,h,w)-I_k^t(c,h,w)
+\right\}^{2}.
+\tag{16}
+$$
+
+A subband with a smaller reconstruction error receives a larger IER value. In
+natural-image datasets, high-frequency subbands generally have lower energy and
+smaller losses, so the IER tends to assign larger values to these subbands. The
+subband weights are obtained by averaging the IER over the calibration data:
+
+$$
+w_{\mathrm{SFL}}(\sigma_s)
+=
+\frac{1}{N}
+\sum_{k=1}^{N}
+\operatorname{IER}(k \mid \sigma_s).
+\tag{17}
+$$
+
+This data-driven weighting gives greater emphasis to subbands with smaller
+initial errors and helps balance learning across spatial frequencies. In the
+public implementation, the calibration workflow estimates these weights before
+normal optimization and then keeps the calibrated weights fixed during
+training.
 
 ## Quick start
 
