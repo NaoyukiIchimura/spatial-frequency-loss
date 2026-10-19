@@ -45,13 +45,27 @@ Use versions compatible with the PyTorch environment of the target project.
 
 ## Installation
 
-Clone the repository and run Python from the repository root, or copy
-`spatial_frequency_loss.py` into the target project.
+### Install from PyPI
+
+For most users, install the released package from PyPI:
+
+```bash
+python3 -m pip install spatial-frequency-loss
+```
+
+### Install from GitHub
+
+To use the source code, tests, and documentation from GitHub, clone the
+repository and install it in editable mode:
 
 ```bash
 git clone https://github.com/NaoyukiIchimura/spatial-frequency-loss.git
 cd spatial-frequency-loss
+python3 -m pip install -e .
 ```
+
+Alternatively, `spatial_frequency_loss.py` can be copied directly into an
+existing project when a local single-file integration is preferred.
 
 ## Quick start
 

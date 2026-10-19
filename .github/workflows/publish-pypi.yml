@@ -1,0 +1,66 @@
+name: Publish package to PyPI
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-and-build:
+    name: Test and build distributions
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install test and build tools
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install build pytest twine
+          python3 -m pip install numpy torch
+
+      - name: Verify formal module checksum
+        run: sha256sum -c spatial_frequency_loss.sha256
+
+      - name: Run public test suite
+        run: python3 -m pytest -q
+
+      - name: Build wheel and source distribution
+        run: python3 -m build
+
+      - name: Check distribution metadata
+        run: |
+          python3 -m twine check \
+            dist/spatial_frequency_loss-1.0.1-py3-none-any.whl \
+            dist/spatial_frequency_loss-1.0.1.tar.gz
+
+      - name: Upload distributions as workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-package-distributions
+          path: dist/
+          if-no-files-found: error
+
+  publish-to-pypi:
+    name: Publish distributions to PyPI
+    needs: test-and-build
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/project/spatial-frequency-loss/
+    permissions:
+      id-token: write
+
+    steps:
+      - name: Download distributions
+        uses: actions/download-artifact@v5
+        with:
+          name: python-package-distributions
+          path: dist
+
+      - name: Publish distributions to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1

@@ -1,0 +1,47 @@
+[build-system]
+requires = ["setuptools>=77.0.3"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "spatial-frequency-loss"
+version = "1.0.1"
+description = "Spatial Frequency Loss for mitigating spectral bias in deep neural networks"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "GPL-3.0-only"
+license-files = ["LICENSE"]
+authors = [
+    {name = "Naoyuki Ichimura", email = "naoyuki.ichimura@aist.go.jp"},
+]
+keywords = [
+    "deep-learning",
+    "image-reconstruction",
+    "loss-function",
+    "pytorch",
+    "spatial-frequency",
+    "spectral-bias",
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Image Processing",
+]
+dependencies = [
+    "numpy",
+    "torch",
+]
+
+[project.urls]
+Homepage = "https://naoyukiichimura.github.io/spatial-frequency-loss/"
+Repository = "https://github.com/NaoyukiIchimura/spatial-frequency-loss"
+Documentation = "https://naoyukiichimura.github.io/spatial-frequency-loss/"
+Issues = "https://github.com/NaoyukiIchimura/spatial-frequency-loss/issues"
+Paper = "https://doi.org/10.1007/s00138-026-01927-5"
+Corrections = "https://naoyukiichimura.github.io/spatial-frequency-loss/corrections.html"
+
+[tool.setuptools]
+py-modules = ["spatial_frequency_loss"]
