@@ -44,6 +44,42 @@ The public implementation uses:
 
 Use versions compatible with the PyTorch environment of the target project.
 
+## Reproducibility and older PyTorch releases
+
+Both the `conv2d` and `separable` filter backends use replicate padding
+for finite Gaussian filtering. This padding mode is part of the numerical
+definition of the implemented SFL filter bank. Do not replace it with a
+different padding mode when reproducing SFL results.
+
+On older PyTorch releases, CUDA backward for replicate padding may not
+provide a deterministic implementation. In such environments, the strict
+setting
+
+```python
+torch.use_deterministic_algorithms(True)
+```
+
+may raise a `RuntimeError` during backpropagation through the SFL. This
+behavior does not indicate an error in the SFL forward decomposition or loss
+definition.
+
+Users requiring strict bitwise reproducibility should use a PyTorch and CUDA
+environment that provides deterministic backward support for the relevant
+padding operation. When strict execution is not available, the application may
+instead use
+
+```python
+torch.use_deterministic_algorithms(
+    True,
+    warn_only=True,
+)
+```
+
+to continue execution while retaining warnings for operations without a
+deterministic implementation. This fallback does not guarantee bitwise-identical
+gradients for those operations. Complete reproducibility is also not guaranteed
+across different PyTorch releases, platforms, or CUDA environments.
+
 ## Installation
 
 ### Install from PyPI
