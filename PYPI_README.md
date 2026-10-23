@@ -87,7 +87,7 @@ across different PyTorch releases, platforms, or CUDA environments.
 For most users, install the released package from PyPI:
 
 ```bash
-python3 -m pip install spatial-frequency-loss==1.0.1.post5
+python3 -m pip install spatial-frequency-loss==1.0.1.post6
 ```
 
 ### Install from GitHub
@@ -469,14 +469,17 @@ Naoyuki Ichimura, "Spatial frequency loss for mitigating spectral bias in deep
 neural networks," *Machine Vision and Applications* 37, 173 (2026).
 [DOI: 10.1007/s00138-026-01927-5](https://doi.org/10.1007/s00138-026-01927-5)
 
-## Citation
+## Citation and archival
+
+Released versions of `spatial-frequency-loss` are preserved through the
+GitHub-Zenodo integration. For research use, please cite the methodology paper
+and the archived software release corresponding to the version used.
 
 Citation metadata are provided in [CITATION.cff](CITATION.cff). GitHub users can
 also select **Cite this repository** on the repository page to obtain formatted
-citation information.
+citation information. The Zenodo DOI badge and software citation will be added
+after the first archived release is published.
 
-When citing the SFL method and its experimental evaluation, please cite the
-paper listed above.
 ## License
 
 The Spatial Frequency Loss software is licensed under the GNU General Public
