@@ -91,7 +91,7 @@ across different PyTorch releases, platforms, or CUDA environments.
 For most users, install the released package from PyPI:
 
 ```bash
-python3 -m pip install spatial-frequency-loss==1.0.1.post6
+python3 -m pip install spatial-frequency-loss==1.0.1.post7
 ```
 
 ### Install from GitHub
@@ -504,8 +504,6 @@ The methodology, earlier work, and software are cited separately:
 
 - **All released versions:**
   [10.5281/zenodo.23587880](https://doi.org/10.5281/zenodo.23587880)
-- **Version `1.0.1.post6`:**
-  [10.5281/zenodo.23587881](https://doi.org/10.5281/zenodo.23587881)
 
 Citation metadata are provided in
 [CITATION.cff](https://github.com/NaoyukiIchimura/spatial-frequency-loss/blob/main/CITATION.cff).

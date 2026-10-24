@@ -7,8 +7,8 @@ authors:
   - family-names: Ichimura
     given-names: Naoyuki
     orcid: https://orcid.org/0000-0002-1291-7137
-version: 1.0.1.post6
-date-released: 2026-10-23
+version: 1.0.1.post7
+date-released: 2026-10-24
 doi: 10.5281/zenodo.23587880
 repository-code: https://github.com/NaoyukiIchimura/spatial-frequency-loss
 license: GPL-3.0-only
