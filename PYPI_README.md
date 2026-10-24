@@ -13,9 +13,13 @@ spatial-frequency subbands produced by a Difference-of-Gaussians filter bank.
 
 ## Key features
 
-- **Frequency-selective measurements:** A Difference-of-Gaussians filter bank
-  measures discrepancies between corresponding spatial-frequency responses of
-  output and target images.
+- **Frequency-selective monitoring and control:** The key idea of the SFL is to
+  explicitly monitor and control learning progress across spatial frequency
+  components. A Difference-of-Gaussians filter bank extracts subband
+  information, enabling the SFL to measure spatial-frequency discrepancies
+  between output and target images. The resulting subband losses provide
+  frequency-selective measurements, while subband weighting controls their
+  relative contributions during training.
 - **Data-driven subband weighting:** The Inverse Error Ratio (IER)
   determines the subband weights automatically from the training data.
 - **Fidelity-oriented learning:** The SFL does not require adversarial training or
@@ -463,22 +467,50 @@ high-frequency subband losses relative to the pixel-wise baseline. See the
 [project page](https://naoyukiichimura.github.io/spatial-frequency-loss/) for visual examples, quantitative tables,
 computation-time context, and post-publication information.
 
-## Paper
+## Papers
+
+### Current methodology paper
 
 Naoyuki Ichimura, "Spatial frequency loss for mitigating spectral bias in deep
 neural networks," *Machine Vision and Applications* 37, 173 (2026).
 [DOI: 10.1007/s00138-026-01927-5](https://doi.org/10.1007/s00138-026-01927-5)
 
+This paper presents the current SFL formulation implemented in this repository.
+
+### Earlier work
+
+Naoyuki Ichimura, "Spatial Frequency Loss for Learning Convolutional
+Autoencoders," arXiv:1806.02336 [cs.CV] (2018).
+[DOI: 10.48550/arXiv.1806.02336](https://doi.org/10.48550/arXiv.1806.02336)
+
+This earlier work introduced an initial SFL approach for convolutional
+autoencoders using a Laplacian filter bank.
+
 ## Citation and archival
 
-Released versions of `spatial-frequency-loss` are preserved through the
-GitHub-Zenodo integration. For research use, please cite the methodology paper
-and the archived software release corresponding to the version used.
+The methodology, earlier work, and software are cited separately:
 
-Citation metadata are provided in [CITATION.cff](CITATION.cff). GitHub users can
-also select **Cite this repository** on the repository page to obtain formatted
-citation information. The Zenodo DOI badge and software citation will be added
-after the first archived release is published.
+- **Current methodology paper:** Cite the *Machine Vision and Applications*
+  paper when referring to the SFL formulation implemented in this repository.
+- **Earlier work:** Cite the 2018 arXiv paper when referring specifically to
+  the initial SFL approach for convolutional autoencoders using a Laplacian
+  filter bank.
+- **Software release:** Cite the Zenodo archive corresponding to the version of
+  `spatial-frequency-loss` used in your work.
+
+### Software archive on Zenodo
+
+[![Software archive DOI](https://zenodo.org/badge/1409976513.svg)](https://doi.org/10.5281/zenodo.23587880)
+
+- **All released versions:**
+  [10.5281/zenodo.23587880](https://doi.org/10.5281/zenodo.23587880)
+- **Version `1.0.1.post6`:**
+  [10.5281/zenodo.23587881](https://doi.org/10.5281/zenodo.23587881)
+
+Citation metadata are provided in
+[CITATION.cff](https://github.com/NaoyukiIchimura/spatial-frequency-loss/blob/main/CITATION.cff).
+GitHub users can also select **Cite this repository** on the repository page to
+obtain formatted citation information.
 
 ## License
 

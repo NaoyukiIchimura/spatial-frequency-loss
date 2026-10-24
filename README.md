@@ -13,9 +13,13 @@ spatial-frequency subbands produced by a Difference-of-Gaussians filter bank.
 
 ## Key features
 
-- **Frequency-selective measurements:** A Difference-of-Gaussians filter bank
-  measures discrepancies between corresponding spatial-frequency responses of
-  output and target images.
+- **Frequency-selective monitoring and control:** The key idea of the SFL is to
+  explicitly monitor and control learning progress across spatial frequency
+  components. A Difference-of-Gaussians filter bank extracts subband
+  information, enabling the SFL to measure spatial-frequency discrepancies
+  between output and target images. The resulting subband losses provide
+  frequency-selective measurements, while subband weighting controls their
+  relative contributions during training.
 - **Data-driven subband weighting:** The Inverse Error Ratio (IER)
   determines the subband weights automatically from the training data.
 - **Fidelity-oriented learning:** The SFL does not require adversarial training or
