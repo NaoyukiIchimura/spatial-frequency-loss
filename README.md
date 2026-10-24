@@ -568,8 +568,8 @@ The methodology, earlier work, and software are cited separately:
 
 - **All released versions:**
   [10.5281/zenodo.23587880](https://doi.org/10.5281/zenodo.23587880)
-- **Version `1.0.1.post6`:**
-  [10.5281/zenodo.23587881](https://doi.org/10.5281/zenodo.23587881)
+- **Version `1.0.1.post7`:**
+  [10.5281/zenodo.23614367](https://doi.org/10.5281/zenodo.23614367)
 
 Citation metadata are provided in [CITATION.cff](CITATION.cff). GitHub users can
 also select **Cite this repository** on the repository page to obtain formatted
