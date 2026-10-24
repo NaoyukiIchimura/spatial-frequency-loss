@@ -529,26 +529,34 @@ computation-time context, and post-publication information.
 
 ## Paper
 
+### Methodology paper
+
 Naoyuki Ichimura, "Spatial frequency loss for mitigating spectral bias in deep
 neural networks," *Machine Vision and Applications* 37, 173 (2026).
 [DOI: 10.1007/s00138-026-01927-5](https://doi.org/10.1007/s00138-026-01927-5)
 
-[![DOI](https://zenodo.org/badge/1409976513.svg)](https://doi.org/10.5281/zenodo.23587880)
-
 ## Citation and archival
 
-Released versions of `spatial-frequency-loss` are preserved through the
-GitHub-Zenodo integration. For research use, please cite the methodology paper
-and the archived software release corresponding to the version used.
+The methodology and the software are cited separately:
 
-The DOI for all versions of the software is
-[10.5281/zenodo.23587880](https://doi.org/10.5281/zenodo.23587880). The archived
-release for version `1.0.1.post6` is available at
-[10.5281/zenodo.23587881](https://doi.org/10.5281/zenodo.23587881).
+- **Methodology paper:** Cite the *Machine Vision and Applications* paper above
+  when referring to Spatial Frequency Loss as a research method.
+- **Software release:** Cite the Zenodo archive corresponding to the version of
+  `spatial-frequency-loss` used in your work.
+
+### Software archive on Zenodo
+
+[![Software archive DOI](https://zenodo.org/badge/1409976513.svg)](https://doi.org/10.5281/zenodo.23587880)
+
+- **All released versions:**
+  [10.5281/zenodo.23587880](https://doi.org/10.5281/zenodo.23587880)
+- **Version `1.0.1.post6`:**
+  [10.5281/zenodo.23587881](https://doi.org/10.5281/zenodo.23587881)
 
 Citation metadata are provided in [CITATION.cff](CITATION.cff). GitHub users can
 also select **Cite this repository** on the repository page to obtain formatted
 citation information.
+
 ## License
 
 The Spatial Frequency Loss software is licensed under the GNU General Public
