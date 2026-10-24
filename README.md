@@ -527,20 +527,34 @@ high-frequency subband losses relative to the pixel-wise baseline. See the
 [project page](https://naoyukiichimura.github.io/spatial-frequency-loss/) for visual examples, quantitative tables,
 computation-time context, and post-publication information.
 
-## Paper
+## Papers
 
-### Methodology paper
+### Current methodology paper
 
 Naoyuki Ichimura, "Spatial frequency loss for mitigating spectral bias in deep
 neural networks," *Machine Vision and Applications* 37, 173 (2026).
 [DOI: 10.1007/s00138-026-01927-5](https://doi.org/10.1007/s00138-026-01927-5)
 
+This paper presents the current SFL formulation implemented in this repository.
+
+### Earlier work
+
+Naoyuki Ichimura, "Spatial Frequency Loss for Learning Convolutional
+Autoencoders," arXiv:1806.02336 [cs.CV] (2018).
+[DOI: 10.48550/arXiv.1806.02336](https://doi.org/10.48550/arXiv.1806.02336)
+
+This earlier work introduced an initial SFL approach for convolutional
+autoencoders using a Laplacian filter bank.
+
 ## Citation and archival
 
-The methodology and the software are cited separately:
+The methodology, earlier work, and software are cited separately:
 
-- **Methodology paper:** Cite the *Machine Vision and Applications* paper above
-  when referring to Spatial Frequency Loss as a research method.
+- **Current methodology paper:** Cite the *Machine Vision and Applications*
+  paper when referring to the SFL formulation implemented in this repository.
+- **Earlier work:** Cite the 2018 arXiv paper when referring specifically to
+  the initial SFL approach for convolutional autoencoders using a Laplacian
+  filter bank.
 - **Software release:** Cite the Zenodo archive corresponding to the version of
   `spatial-frequency-loss` used in your work.
 
